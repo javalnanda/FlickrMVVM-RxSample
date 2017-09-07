@@ -1,0 +1,19 @@
+/* 
+  File.strings
+  FlickrGallery
+
+  Created by Javal Nanda on 9/7/17.
+  Copyright © 2017 Javal Nanda. All rights reserved.
+*/
+
+"savedPhotoMessage" = "Image has been saved to your photos.";
+"savedPhotoTitle" = "Saved!";
+"saveErrorTitle" = "Save error";
+"defaultErrorTitle" = "Error";
+"datePublishedTitle" = "Date Published";
+"dateTakenTitle" = "Date Taken";
+"orderActionSheetTitle" = "Order By";
+"invalidUrlError" = "Invalid URL, unable to fetch feed";
+"noNewItem" = "There are no new Items to show";
+"invalidIndexpath" = "Invalid indexPath";
+"cannotSendMail" = "Unable to send mail. Check if mail account is configured.";
