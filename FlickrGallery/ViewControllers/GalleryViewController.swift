@@ -10,6 +10,8 @@ import UIKit
 import MBProgressHUD
 import Photos
 import MessageUI
+import RxSwift
+import RxCocoa
 
 enum OrderBy {
     case dateTaken
@@ -22,6 +24,7 @@ class GalleryViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
 
     let galleryViewModel = GalleryViewModel()
+    let disposeBag = DisposeBag()
 
     // refreshcontrol for pull to refresh
     lazy var refreshControl: UIRefreshControl = {
@@ -39,33 +42,16 @@ class GalleryViewController: UIViewController {
         self.tableView.estimatedRowHeight = 320
         tableView.keyboardDismissMode = .onDrag
 
+        galleryViewModel.photosArray.asObservable().bind(to: tableView.rx.items(cellIdentifier: GalleryTableViewCell.cellReuseIdentifier, cellType: GalleryTableViewCell.self)) { _, photo, cell in
+                cell.setData(photoViewModel: PhotoViewModel(photo: photo))
+            }
+            .addDisposableTo(disposeBag) //5
+
         // Add Pull to refresh
         self.tableView.addSubview(self.refreshControl)
 
         // Fetch flickr public feed data
         fetchData()
-    }
-
-    @IBAction func sortBarButtonClicked(_ sender: Any) {
-
-        let alertController = UIAlertController(title: NSLocalizedString("orderActionSheetTitle", comment: ""), message: "", preferredStyle: .actionSheet)
-        let actionDateTaken = UIAlertAction(title: NSLocalizedString("dateTakenTitle", comment: ""), style: .default) { (_) in
-            self.dismiss(animated: true, completion: nil)
-            self.sortData(orderBy: .dateTaken)
-        }
-        let actionDatePublished = UIAlertAction(title: NSLocalizedString("datePublishedTitle", comment: ""), style: .default) { (_) in
-            self.dismiss(animated: true, completion: nil)
-            self.sortData(orderBy: .datePublished)
-        }
-        alertController.addAction(actionDateTaken)
-        alertController.addAction(actionDatePublished)
-        self.present(alertController, animated: true, completion: nil)
-    }
-
-    func sortData(orderBy: OrderBy) {
-        galleryViewModel.sortData(orderBy: orderBy) {_ in
-            tableView.reloadData()
-        }
     }
 
     func fetchData(query: String? = nil) {
@@ -80,7 +66,6 @@ class GalleryViewController: UIViewController {
 
             switch result {
             case .success( _):
-                self.tableView.reloadData()
                 break
 
             case .error(let message):
@@ -113,19 +98,4 @@ extension GalleryViewController {
         self.present(alertController, animated: true, completion: nil)
     }
 
-}
-
-// MARK: - UITableViewDataSource
-extension GalleryViewController: UITableViewDataSource {
-
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return galleryViewModel.numberOfRowsInSection(section: section)
-    }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: GalleryTableViewCell.cellReuseIdentifier, for: indexPath) as? GalleryTableViewCell else { fatalError("Unexpected Table View Cell") }
-
-        cell.setData(photoViewModel: galleryViewModel.itemForRowAtIndexPath(indexPath: indexPath))
-        return cell
-    }
 }
