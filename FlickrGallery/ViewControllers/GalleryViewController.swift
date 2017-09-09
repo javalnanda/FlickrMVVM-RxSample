@@ -52,6 +52,9 @@ class GalleryViewController: UIViewController {
 
         // Fetch flickr public feed data
         fetchData()
+
+        // Configure Search
+        configureSearch()
     }
 
     func fetchData(query: String? = nil) {
@@ -75,7 +78,24 @@ class GalleryViewController: UIViewController {
         }
     }
 
+    func configureSearch() {
+        searchBar
+            .rx.text // Observable property thanks to RxCocoa
+            .orEmpty // Make it non-optional
+            .debounce(0.5, scheduler: MainScheduler.instance) // Wait 0.5 for changes.
+            .distinctUntilChanged() // If they didn't occur, check if the new value is the same as old.
+            .filter { query in return query.characters.count >= 3 } //Trigger search only if query length is 3 letters or more
+            .subscribe(onNext: { [unowned self] query in // Here we subscribe to every new value, that is not empty (thanks to filter above).
+                // We now do our "API Request" to search with tags.
+                self.fetchData(query: query)
+            })
+            .addDisposableTo(disposeBag) // Don't forget to add this to disposeBag. We want to dispose it on deinit.
+
+    }
+
     func handleRefresh(_ refreshControl: UIRefreshControl) {
+        //clear search field on pull to refresh
+        searchBar.text = ""
         fetchData()
     }
 
