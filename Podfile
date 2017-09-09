@@ -6,7 +6,8 @@ target 'FlickrGallery' do
   use_frameworks!
   pod 'SDWebImage', '~> 4.0'
   pod 'MBProgressHUD', '~> 1.0.0'
-  # Pods for FlickrGallery
+  pod 'RxSwift'
+  pod 'RxCocoa'
 
   target 'FlickrGalleryTests' do
     inherit! :search_paths
